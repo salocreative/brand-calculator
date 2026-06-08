@@ -709,8 +709,12 @@ function calcPackage(pkgName) {
 
 function leadTimeLabel(days) {
   if (!days) return '—';
-  if (days >= 14) return `${Math.round(days / 7)} weeks`;
-  return `${days} day${days !== 1 ? 's' : ''}`;
+  if (days < 5)  return `${days} day${days !== 1 ? 's' : ''}`;
+  const weeks = days / 5;
+  if (Number.isInteger(weeks)) return `${weeks} week${weeks !== 1 ? 's' : ''}`;
+  // Non-round: show as "X–Y weeks" banded to nearest half-week
+  const lo = Math.floor(weeks), hi = Math.ceil(weeks);
+  return lo === hi ? `${lo} weeks` : `${lo}–${hi} weeks`;
 }
 
 function getAddons() {
@@ -829,7 +833,7 @@ function renderTable() {
       const lt   = d ? (d.leadTime || '') : '';
       html += `<div class="pkg-info-row" id="${rowId}">
         ${desc ? `<div class="pkg-info-desc">${desc}</div>` : ''}
-        ${lt   ? `<div class="pkg-info-lead">⏱ Timeline: <strong>${lt}</strong></div>` : ''}
+        ${lt   ? `<div class="pkg-info-lead">⏱ Timeline: <strong>${leadTimeLabel(parseFloat(lt) || 0)}</strong></div>` : ''}
       </div>`;
     }
   });

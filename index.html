@@ -604,7 +604,7 @@ async function fetchTab(tab) {
 }
 
 function parsePackages(rows) {
-  const headers = rows[0].slice(1);
+  const headers = rows[0].slice(1).filter(h => h.trim());
   const pkgs = {};
   headers.forEach(h => pkgs[h] = []);
   for (let i = 1; i < rows.length; i++) {
@@ -749,6 +749,7 @@ function renderTable() {
 
   // Set selected-column class
   const selIdx = state.selectedPackage ? pkgNames.indexOf(state.selectedPackage) : -1;
+  grid.style.gridTemplateColumns = `var(--col-w) repeat(${pkgNames.length}, 1fr)`;
   grid.className = 'pkg-grid' + (selIdx >= 0 ? ` sel-${selIdx}` : '');
 
   let html = '';

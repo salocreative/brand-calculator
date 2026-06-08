@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brand Package Configurator — Salo Creative</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0A0A0A;
+      --surface:   #141414;
+      --surface-2: #1C1C1C;
+      --surface-3: #222222;
+      --border:    #272727;
+      --border-hi: #3a3a3a;
+      --border-sel:#FFFFFF;
+      --text:      #FFFFFF;
+      --text-2:    #888888;
+      --text-3:    #444444;
+      --green:     #4ADE80;
+      --amber:     #F59E0B;
+      --purple:    #a78bfa;
+      --col-w:     200px; /* label column width */
+    }
+
+    html { font-size: 16px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ──────────────────────────────────── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0;
+      background: rgba(10,10,10,0.95);
+      backdrop-filter: blur(12px);
+      z-index: 300;
+    }
+    .logo {
+      display: flex; align-items: center;
+      text-decoration: none; flex-shrink: 0;
+      opacity: 1; transition: opacity 0.15s;
+    }
+    .logo:hover { opacity: 0.7; }
+    .logo svg { display: block; }
+    .tagline { font-size: 12px; color: var(--text-2); letter-spacing: 0.04em; }
+
+    /* ── Page layout ─────────────────────────────── */
+    .page {
+      max-width: 1240px; margin: 0 auto;
+      padding: 0 40px 120px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 48px;
+      align-items: start;
+    }
+
+    /* ── Controls bar ────────────────────────────── */
+    .controls-bar {
+      grid-column: 1 / -1;
+      padding: 32px 0 28px;
+      display: flex; align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap; gap: 20px;
+    }
+    .controls-bar h1 { font-size: 21px; font-weight: 500; letter-spacing: -0.02em; }
+    .controls-bar p  { font-size: 13px; color: var(--text-2); margin-top: 3px; }
+    .toggles { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+    .toggle-group-wrap { display: flex; flex-direction: column; gap: 5px; }
+    .toggle-label-row  { display: flex; align-items: center; gap: 6px; }
+    .toggle-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; }
+    .toggle-group {
+      display: flex; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .toggle-btn {
+      padding: 7px 14px; font-size: 12px; font-family: inherit;
+      font-weight: 500; letter-spacing: 0.02em;
+      background: transparent; border: none; color: var(--text-2);
+      cursor: pointer; transition: background 0.15s, color 0.15s; white-space: nowrap;
+    }
+    .toggle-btn.active { background: var(--surface-2); color: var(--text); }
+
+    /* ── Info button ─────────────────────────────── */
+    .info-btn {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-3); font-size: 10px; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .info-btn:hover { border-color: var(--text-2); color: var(--text-2); }
+
+    /* ── Tier info panel ─────────────────────────── */
+    .tier-info-panel {
+      display: none; grid-column: 1 / -1;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 22px; margin-bottom: 16px;
+    }
+    .tier-info-panel.visible { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .tier-info-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-3); margin-bottom: 14px; grid-column: 1 / -1;
+    }
+    .tier-badge {
+      font-size: 10px; font-weight: 500; padding: 2px 7px;
+      border-radius: 4px; letter-spacing: 0.04em;
+    }
+    .tier-badge.partner { background: #2a251a; color: var(--amber); }
+    .tier-badge.white   { background: #2a1a2a; color: var(--purple); }
+    .tier-block-name {
+      font-size: 13px; font-weight: 600; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tier-block p  { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+    .tier-block ul { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 3px; }
+    .tier-block li { font-size: 11px; color: var(--text-2); display: flex; gap: 6px; }
+    .tier-block li::before { content: '—'; color: var(--text-3); flex-shrink: 0; }
+
+    /* ── Sheet status ────────────────────────────── */
+    .sheet-status {
+      grid-column: 1 / -1;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; color: var(--text-3);
+      padding: 7px 12px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px;
+    }
+    .sheet-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
+    .sheet-status.connected .dot { background: var(--green); }
+    .sheet-status.connected { color: var(--text-2); }
+
+    /* ── Package comparison table ────────────────── */
+    .pkg-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 40px;
+    }
+    .pkg-grid {
+      display: grid;
+      grid-template-columns: var(--col-w) repeat(3, 1fr);
+      min-width: 580px;
+    }
+
+    /* Column selected state */
+    .pkg-grid.sel-0 .pkg-col-0,
+    .pkg-grid.sel-1 .pkg-col-1,
+    .pkg-grid.sel-2 .pkg-col-2 { background: var(--surface-2); }
+
+    /* Header row */
+    .pkg-header-label {
+      grid-column: 1;
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-end;
+    }
+    .pkg-col-header {
+      padding: 20px 16px 0;
+      border-bottom: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+    .pkg-col-header:hover { background: var(--surface-2); }
+
+    /* Top accent bar for selected column */
+    .pkg-grid.sel-0 .pkg-col-0.pkg-col-header::before,
+    .pkg-grid.sel-1 .pkg-col-1.pkg-col-header::before,
+    .pkg-grid.sel-2 .pkg-col-2.pkg-col-header::before {
+      content: '';
+      position: absolute; top: -1px; left: -1px; right: 0;
+      height: 2px; background: var(--text);
+    }
+    .pkg-option { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); margin-bottom: 4px; }
+    .pkg-name   { font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
+    .pkg-days   { font-size: 12px; color: var(--text-2); margin-bottom: 10px; }
+    .pkg-price  { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--text-2); }
+
+    .pkg-grid.sel-0 .pkg-col-0 .pkg-price,
+    .pkg-grid.sel-1 .pkg-col-1 .pkg-price,
+    .pkg-grid.sel-2 .pkg-col-2 .pkg-price { color: var(--green); }
+
+    .pkg-select-btn {
+      width: 100%; padding: 9px 0;
+      font-family: inherit; font-size: 12px; font-weight: 600;
+      letter-spacing: 0.03em; cursor: pointer;
+      border-radius: 6px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-2);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      margin-bottom: 16px;
+    }
+    .pkg-col-header:hover .pkg-select-btn { border-color: var(--border-hi); color: var(--text); }
+
+    .pkg-grid.sel-0 .pkg-col-0 .pkg-select-btn,
+    .pkg-grid.sel-1 .pkg-col-1 .pkg-select-btn,
+    .pkg-grid.sel-2 .pkg-col-2 .pkg-select-btn {
+      background: var(--text); color: var(--bg);
+      border-color: var(--text);
+    }
+
+    /* Section divider rows */
+    .pkg-section-label {
+      grid-column: 1 / -1;
+      padding: 10px 18px 8px;
+      font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-3);
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .pkg-section-label:first-of-type { border-top: none; }
+
+    /* Data rows */
+    .pkg-row-label {
+      padding: 10px 18px;
+      font-size: 12px; color: var(--text-2);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center;
+      line-height: 1.4;
+    }
+    .pkg-cell {
+      padding: 10px 0;
+      border-top: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tick-icon { color: var(--text-3); transition: color 0.15s; }
+    .tick-icon.included { color: var(--text-2); }
+
+    .pkg-grid.sel-0 .pkg-col-0 .tick-icon.included,
+    .pkg-grid.sel-1 .pkg-col-1 .tick-icon.included,
+    .pkg-grid.sel-2 .pkg-col-2 .tick-icon.included { color: var(--green); }
+
+    /* ── Add-ons section ──────────────────────────── */
+    .addons-section {}
+    .addons-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 16px; margin-bottom: 2px;
+      border-bottom: 1px solid var(--border);
+    }
+    .addons-title-row { display: flex; align-items: center; gap: 10px; }
+    .addons-title {
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-2);
+    }
+    .addons-tag {
+      font-size: 10px; padding: 2px 8px; border-radius: 4px;
+      background: #1a1a2e; color: #818cf8;
+      font-weight: 500; letter-spacing: 0.04em;
+    }
+    .addons-count { font-size: 11px; color: var(--text-3); }
+    .addons-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; margin-top: 14px;
+    }
+
+    /* ── Add-on cards ─────────────────────────────── */
+    .addon-card {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px 18px; cursor: pointer; background: var(--surface);
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none; position: relative;
+      display: flex; flex-direction: column;
+    }
+    .addon-card:hover { border-color: var(--border-hi); background: #181818; }
+    .addon-card.selected { border-color: var(--border-sel); background: #161616; }
+    .addon-card.selected::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: var(--text); border-radius: 10px 10px 0 0;
+    }
+    .addon-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 10px; gap: 8px;
+    }
+    .check {
+      width: 17px; height: 17px; min-width: 17px;
+      border: 1.5px solid var(--border); border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s, background 0.15s; margin-top: 1px;
+    }
+    .addon-card.selected .check { background: var(--text); border-color: var(--text); }
+    .check svg { display: none; }
+    .addon-card.selected .check svg { display: block; }
+    .days-badge {
+      font-size: 10px; color: var(--text-3);
+      background: var(--surface-2); border: 1px solid var(--border);
+      padding: 2px 7px; border-radius: 4px; white-space: nowrap;
+    }
+    .addon-name { font-size: 13px; font-weight: 500; line-height: 1.4; margin-bottom: 5px; }
+    .addon-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; flex: 1; }
+    .addon-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+    .addon-price { font-size: 12px; font-weight: 500; color: var(--text-3); }
+    .addon-card.selected .addon-price { color: var(--text); }
+
+    /* ── Quote sidebar ────────────────────────────── */
+    .quote-sidebar { position: sticky; top: 80px; }
+    .quote-card {
+      border: 1px solid var(--border); border-radius: 12px;
+      background: var(--surface); overflow: hidden;
+    }
+    .quote-header { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+    .quote-header h2 { font-size: 14px; font-weight: 500; }
+    .quote-header p  { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+    .quote-body { padding: 14px 20px; min-height: 80px; max-height: 380px; overflow-y: auto; }
+    .quote-body::-webkit-scrollbar { width: 4px; }
+    .quote-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .quote-empty { font-size: 12px; color: var(--text-3); font-style: italic; padding: 6px 0; }
+    .quote-pkg-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--border); gap: 8px;
+    }
+    .quote-pkg-name { font-size: 13px; font-weight: 500; }
+    .quote-pkg-price { font-size: 13px; font-weight: 600; color: var(--green); white-space: nowrap; }
+    .quote-pkg-days { font-size: 11px; color: var(--text-2); margin-top: 1px; }
+    .quote-addons-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-3); padding: 10px 0 4px;
+    }
+    .quote-item {
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-size: 12px; padding: 5px 0;
+      border-bottom: 1px solid var(--border); gap: 8px;
+      animation: fadeIn 0.12s ease;
+    }
+    .quote-item:last-child { border-bottom: none; }
+    .quote-item-name  { color: var(--text-2); flex: 1; line-height: 1.4; }
+    .quote-item-price { color: var(--text); font-weight: 500; white-space: nowrap; }
+    .quote-totals {
+      padding: 14px 20px; border-top: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+    .quote-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 5px; font-size: 12px;
+    }
+    .quote-row.total {
+      font-size: 15px; font-weight: 600;
+      margin-top: 10px; margin-bottom: 0;
+      padding-top: 10px; border-top: 1px solid var(--border);
+    }
+    .quote-row-label { color: var(--text-2); }
+    .quote-row.total .quote-row-label { color: var(--text); }
+    .quote-row-value { font-weight: 500; }
+    .quote-row.total .quote-row-value { color: var(--green); }
+    .vat-note { font-size: 11px; color: var(--text-3); margin-top: 8px; }
+    .cta-btn {
+      display: block; width: 100%; padding: 14px;
+      background: var(--text); color: var(--bg);
+      border: none; border-radius: 0 0 12px 12px;
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      letter-spacing: 0.02em; cursor: pointer;
+      transition: opacity 0.15s; text-align: center; text-decoration: none;
+    }
+    .cta-btn:hover { opacity: 0.85; }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 960px) {
+      .page { grid-template-columns: 1fr; gap: 32px; padding: 0 20px 80px; }
+      header { padding: 16px 20px; }
+      .controls-bar, .sheet-status, .tier-info-panel { grid-column: 1; }
+      .addons-grid { grid-template-columns: 1fr; }
+      .quote-sidebar { position: static; order: -1; }
+      .tier-info-panel.visible { grid-template-columns: 1fr; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="tagline">Brand Package Configurator</span>
+  <a class="logo" href="https://salo.uk">
+    <svg width="80" height="23" viewBox="0 0 207 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Salo Creative">
+    <g clip-path="url(#salo-clip)">
+      <path d="M203.626 18.15C196.267 2.40542 177.538 -4.39014 161.792 2.96773L160.415 0.0196118C144.669 7.37748 137.871 26.1039 145.23 41.8484C152.588 57.593 171.317 64.3886 187.063 57.0307L188.44 59.977C204.186 52.6192 210.984 33.8928 203.626 18.1482V18.15ZM181.567 45.2755C172.316 49.5983 161.313 45.6036 156.99 36.3549C152.666 27.1043 156.662 16.103 165.911 11.7801L167.288 14.7247C176.54 10.4019 187.542 14.3966 191.866 23.6453C196.189 32.8959 192.194 43.8972 182.944 48.22L181.567 45.2755Z" fill="white"/>
+      <path d="M143.899 59.4838L116.398 59.4855H109.786V59.4838H108.179L106.371 55.6062L103.417 49.2718V0.501953H116.398V46.5064H137.848L143.032 57.6248L143.899 59.4838Z" fill="white"/>
+      <path d="M78.2581 15.8546L71.0964 0.500244L63.9363 15.8563L65.3236 18.8293L58.1725 34.1641L46.3645 59.4803H60.6863L65.3325 49.5184L72.4836 34.1854L84.2792 59.4803H98.5992L98.6028 59.4785L78.2581 15.8546Z" fill="white"/>
+      <path d="M43.7407 40.8302C43.7407 40.9632 43.7407 41.0909 43.7371 41.2204C43.5278 51.3437 35.2554 59.4803 25.0831 59.4803H0L6.05124 46.5011H10.0978V46.5065H25.4663C27.0328 46.5065 28.4502 45.8714 29.4756 44.8461C30.5028 43.8191 31.1379 42.4018 31.1379 40.8355C31.1379 37.7029 28.5975 35.1645 25.4663 35.1645H25.2782C25.2126 35.1628 25.1487 35.161 25.0831 35.161H20.4067C16.1278 35.161 12.2089 33.6373 9.18419 31.0652C5.54386 27.9734 3.19859 23.4058 3.07086 18.29C3.07086 18.2173 3.06199 17.9211 3.06199 17.843C3.06199 13.0537 5.00278 8.71843 8.14105 5.58051C11.2793 2.44259 15.6151 0.502018 20.4032 0.500244H45.8447L39.7881 13.4794H20.4067C20.3819 13.4794 20.3571 13.4794 20.3322 13.4812H20.0803C18.8758 13.4812 17.7829 13.969 16.9935 14.7601C16.2041 15.5495 15.7144 16.6404 15.7144 17.8466C15.7144 20.2572 17.6694 22.2102 20.0803 22.2102H25.4042C35.5606 22.3805 43.7407 30.6342 43.7407 40.8302Z" fill="white"/>
+    </g>
+    <defs><clipPath id="salo-clip"><rect width="206.594" height="60" fill="white"/></clipPath></defs>
+  </svg>
+  </a>
+</header>
+
+<div class="page">
+
+  <!-- Controls -->
+  <div class="controls-bar">
+    <div>
+      <h1>Choose your brand package.</h1>
+      <p>Select a package, then add any extras below.</p>
+    </div>
+    <div class="toggles">
+      <div class="toggle-group-wrap">
+        <div class="toggle-label-row"><span class="toggle-label">Currency</span></div>
+        <div class="toggle-group" id="currency-toggle">
+          <button class="toggle-btn active" data-val="GBP">£ GBP</button>
+          <button class="toggle-btn" data-val="USD">$ USD</button>
+        </div>
+      </div>
+      <div class="toggle-group-wrap">
+        <div class="toggle-label-row">
+          <span class="toggle-label">Client type</span>
+          <button class="info-btn" id="tier-info-btn">i</button>
+        </div>
+        <div class="toggle-group" id="tier-toggle">
+          <button class="toggle-btn active" data-val="Partner">Partner</button>
+          <button class="toggle-btn" data-val="White-label">White-label</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tier info -->
+  <div class="tier-info-panel" id="tier-info-panel">
+    <div class="tier-info-title">What's the difference?</div>
+    <div class="tier-block">
+      <div class="tier-block-name">Partner <span class="tier-badge partner">Agency</span></div>
+      <p>For agencies bringing Salo in alongside their own team. A reduced day rate in exchange for an ongoing working relationship.</p>
+      <ul>
+        <li>Agency is the primary client contact</li>
+        <li>Salo may be referenced as a creative partner</li>
+        <li>Suited to studios that sub-contract selectively</li>
+      </ul>
+    </div>
+    <div class="tier-block">
+      <div class="tier-block-name">White-label <span class="tier-badge white">Full cover</span></div>
+      <p>Full invisibility. Salo's involvement is never disclosed. All work delivered under your brand, zero attribution.</p>
+      <ul>
+        <li>No Salo branding anywhere on deliverables</li>
+        <li>Files in agency-branded templates</li>
+        <li>NDA available on request</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Sheet status -->
+  <div class="sheet-status" id="sheet-status">
+    <span class="dot"></span>
+    <span id="sheet-status-text">Loading pricing…</span>
+  </div>
+
+  <!-- Main column -->
+  <div class="main-col">
+
+    <!-- Package comparison table -->
+    <div class="pkg-table-wrap" id="pkg-table-wrap">
+      <div class="pkg-grid" id="pkg-grid"><!-- rendered by JS --></div>
+    </div>
+
+    <!-- Add-ons -->
+    <div class="addons-section" id="addons-section" style="display:none">
+      <div class="addons-header">
+        <div class="addons-title-row">
+          <span class="addons-title">Additional Deliverables</span>
+          <span class="addons-tag">Optional extras</span>
+        </div>
+        <span class="addons-count" id="addons-count"></span>
+      </div>
+      <div class="addons-grid" id="addons-grid"><!-- rendered by JS --></div>
+    </div>
+  </div>
+
+  <!-- Quote sidebar -->
+  <div class="quote-sidebar">
+    <div class="quote-card">
+      <div class="quote-header">
+        <h2>Your Estimate</h2>
+        <p id="quote-tier-label">Partner rate · GBP</p>
+      </div>
+      <div class="quote-body" id="quote-body">
+        <p class="quote-empty">Select a package to begin.</p>
+      </div>
+      <div class="quote-totals">
+        <div class="quote-row">
+          <span class="quote-row-label">Estimated days</span>
+          <span class="quote-row-value" id="quote-days">—</span>
+        </div>
+        <div class="quote-row total">
+          <span class="quote-row-label">Total estimate</span>
+          <span class="quote-row-value" id="quote-total">—</span>
+        </div>
+        <p class="vat-note">All prices ex. VAT</p>
+      </div>
+      <a class="cta-btn" href="https://salo.uk/contact" target="_blank">Get in touch →</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
+
+const SHEET_ID = '1PDvXiHkp_blDoWOPggSxs4lFljKGi5U7JnOt6VAO7FQ';
+const sheetUrl = tab =>
+  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FALLBACK DATA
+// ─────────────────────────────────────────────────────────────────────────────
+
+const FALLBACK = {
+  packages: {
+    'Core Brand':              ['Discovery & Workshop','Research & Positioning','Typography & Colour Systems','Concept Development','Refinement & Feedback Rounds','Logo Finalisation & Brand Guidelines'],
+    'Core + Brand System':     ['Discovery & Workshop','Research & Positioning','Typography & Colour Systems','Concept Development','Refinement & Feedback Rounds','Logo Finalisation & Brand Guidelines','Social Assets & Templates','Stationery','Ad Creatives','Additional Refinement & Rollout'],
+    'Core + System + Digital': ['Discovery & Workshop','Research & Positioning','Typography & Colour Systems','Concept Development','Refinement & Feedback Rounds','Logo Finalisation & Brand Guidelines','Social Assets & Templates','Stationery','Ad Creatives','Additional Refinement & Rollout','Homepage Mockup','App Homepage Mockup','Final Presentation & Refinement'],
+  },
+  deliverables: [
+    { name:'Discovery & Workshop',              days:1,   prices:{'Partner':{'GBP':670,'USD':890},'White-label':{'GBP':720,'USD':960}}   },
+    { name:'Research & Positioning',            days:2,   prices:{'Partner':{'GBP':1340,'USD':1780},'White-label':{'GBP':1440,'USD':1920}} },
+    { name:'Typography & Colour Systems',       days:2,   prices:{'Partner':{'GBP':1340,'USD':1780},'White-label':{'GBP':1440,'USD':1920}} },
+    { name:'Concept Development',               days:4,   prices:{'Partner':{'GBP':2680,'USD':3560},'White-label':{'GBP':2880,'USD':3840}} },
+    { name:'Refinement & Feedback Rounds',      days:3,   prices:{'Partner':{'GBP':2010,'USD':2670},'White-label':{'GBP':2160,'USD':2880}} },
+    { name:'Logo Finalisation & Brand Guidelines',days:2, prices:{'Partner':{'GBP':1340,'USD':1780},'White-label':{'GBP':1440,'USD':1920}} },
+    { name:'Social Assets & Templates',         days:3,   prices:{'Partner':{'GBP':2010,'USD':2670},'White-label':{'GBP':2160,'USD':2880}} },
+    { name:'Stationery',                        days:1,   prices:{'Partner':{'GBP':670,'USD':890},'White-label':{'GBP':720,'USD':960}}   },
+    { name:'Ad Creatives',                      days:2.5, prices:{'Partner':{'GBP':1675,'USD':2225},'White-label':{'GBP':1800,'USD':2400}} },
+    { name:'Additional Refinement & Rollout',   days:2,   prices:{'Partner':{'GBP':1340,'USD':1780},'White-label':{'GBP':1440,'USD':1920}} },
+    { name:'Homepage Mockup',                   days:3,   prices:{'Partner':{'GBP':2010,'USD':2670},'White-label':{'GBP':2160,'USD':2880}} },
+    { name:'App Homepage Mockup',               days:2,   prices:{'Partner':{'GBP':1340,'USD':1780},'White-label':{'GBP':1440,'USD':1920}} },
+    { name:'Final Presentation & Refinement',   days:1,   prices:{'Partner':{'GBP':670,'USD':890},'White-label':{'GBP':720,'USD':960}}   },
+    { name:'AI Brand Context Pack',             days:1,   prices:{'Partner':{'GBP':670,'USD':890},'White-label':{'GBP':720,'USD':960}},   desc:'A structured document with tone of voice, personality, and example prompts designed for use with AI tools.' },
+    { name:'Marketing One-Pager',               days:1,   prices:{'Partner':{'GBP':670,'USD':890},'White-label':{'GBP':720,'USD':960}},   desc:'A reusable one-page template for general marketing and event promotion.' },
+    { name:'Presentation Deck Template',        days:4,   prices:{'Partner':{'GBP':2680,'USD':3560},'White-label':{'GBP':2880,'USD':3840}},desc:'A flexible presentation system with up to 10 master layouts for client and internal use.' },
+    { name:'Case Study Template',               days:1,   prices:{'Partner':{'GBP':670,'USD':890},'White-label':{'GBP':720,'USD':960}},   desc:'A reusable template for showcasing projects or outcomes, aligned to the brand system.' },
+    { name:'Proposal Template',                 days:1,   prices:{'Partner':{'GBP':670,'USD':890},'White-label':{'GBP':720,'USD':960}},   desc:'A structured proposal layout covering intro, approach, timeline, and pricing.' },
+    { name:'Email Templates (×3)',              days:2,   prices:{'Partner':{'GBP':1340,'USD':1780},'White-label':{'GBP':1440,'USD':1920}},desc:'Three branded email designs covering transactional, marketing, and announcement use cases.' },
+    { name:'Business Cards',                    days:0.5, prices:{'Partner':{'GBP':335,'USD':445},'White-label':{'GBP':360,'USD':480}},   desc:'Standard business card design aligned to the brand identity.' },
+    { name:'Event Signage / Display Stand',     days:1.5, prices:{'Partner':{'GBP':1005,'USD':1335},'White-label':{'GBP':1080,'USD':1440}},desc:'Display stand artwork for events and exhibitions, aligned to the brand system.' },
+    { name:'Physical Signage',                  days:2,   prices:{'Partner':{'GBP':1340,'USD':1780},'White-label':{'GBP':1440,'USD':1920}},desc:'Signage artwork for office, retail, or physical space use.' },
+    { name:'Website Pages (5–8)',               days:5,   prices:{'Partner':{'GBP':3350,'USD':4450},'White-label':{'GBP':3600,'USD':4800}},desc:'High-fidelity designs for key website pages using the new brand system.' },
+    { name:'PDF Brand Guidelines',              days:1,   prices:{'Partner':{'GBP':670,'USD':890},'White-label':{'GBP':720,'USD':960}},   desc:'A live, hosted brand guidelines site — structured, searchable, and always up to date.' },
+  ]
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+let DATA = null;
+
+const state = {
+  currency:        'GBP',
+  tier:            'Partner',
+  selectedPackage: null,
+  addons:          new Set(),
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CSV PARSER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], n = text[i+1];
+    if (q) {
+      if (c === '"' && n === '"') { f += '"'; i++; }
+      else if (c === '"') q = false;
+      else f += c;
+    } else {
+      if (c === '"') q = true;
+      else if (c === ',') { row.push(f.trim()); f = ''; }
+      else if (c === '\n' || (c === '\r' && n === '\n')) {
+        if (c === '\r') i++;
+        row.push(f.trim()); rows.push(row); row = []; f = '';
+      } else f += c;
+    }
+  }
+  if (f || row.length) { row.push(f.trim()); rows.push(row); }
+  return rows.filter(r => r.some(c => c));
+}
+
+function stripCurrency(v) { return parseFloat(v.replace(/[£$,\s]/g,'')) || 0; }
+function parseBool(v)     { return (v||'').toUpperCase() === 'TRUE'; }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SHEET FETCH
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function fetchTab(tab) {
+  const r = await fetch(sheetUrl(tab));
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return parseCsv(await r.text());
+}
+
+function parsePackages(rows) {
+  const headers = rows[0].slice(1);
+  const pkgs = {};
+  headers.forEach(h => pkgs[h] = []);
+  for (let i = 1; i < rows.length; i++) {
+    const name = rows[i][0];
+    headers.forEach((pkg, j) => { if (parseBool(rows[i][j+1])) pkgs[pkg].push(name); });
+  }
+  return pkgs;
+}
+
+function parseDeliverables(rows) {
+  return rows.slice(1).filter(r => r[0]).map(r => {
+    const raw  = r[7] || '';
+    const idx  = raw.indexOf(',');
+    const desc = idx > -1 ? raw.slice(idx+1).trim() : raw;
+    return {
+      name:  r[0],
+      days:  parseFloat(r[1]) || 0,
+      prices: {
+        'Partner':      { GBP: stripCurrency(r[2]), USD: stripCurrency(r[4]) },
+        'White-label':  { GBP: stripCurrency(r[3]), USD: stripCurrency(r[5]) },
+      },
+      optional: parseBool(r[6]),
+      desc,
+    };
+  });
+}
+
+async function loadData() {
+  try {
+    const [pkgRows, dlRows] = await Promise.all([fetchTab('Packages'), fetchTab('Deliverables')]);
+    DATA = { packages: parsePackages(pkgRows), deliverables: parseDeliverables(dlRows) };
+    setStatus('connected', 'Pricing loaded live from Google Sheet.');
+  } catch(e) {
+    DATA = FALLBACK;
+    setStatus('', 'Using built-in pricing. Set the sheet to "Anyone with link can view" for live rates.');
+  }
+  renderAll();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function setStatus(type, msg) {
+  const el = document.getElementById('sheet-status');
+  el.className = 'sheet-status' + (type ? ' '+type : '');
+  document.getElementById('sheet-status-text').textContent = msg;
+}
+
+function getDeliverable(name) { return DATA.deliverables.find(d => d.name === name); }
+function getPrice(d)          { return d.prices[state.tier][state.currency]; }
+function fmt(n)               { return (state.currency==='GBP'?'£':'$') + n.toLocaleString('en-GB',{maximumFractionDigits:0}); }
+
+function daysLabel(d) {
+  if (d === 0.5) return '½ day';
+  if (d === 1.5) return '1½ days';
+  if (d === 2.5) return '2½ days';
+  return `${d} day${d!==1?'s':''}`;
+}
+
+function calcPackage(pkgName) {
+  let days = 0, price = 0;
+  (DATA.packages[pkgName]||[]).forEach(name => {
+    const d = getDeliverable(name);
+    if (d) { days += d.days; price += getPrice(d); }
+  });
+  return { days, price };
+}
+
+function getAddons() {
+  const inPkg = new Set(Object.values(DATA.packages).flat());
+  return DATA.deliverables.filter(d => !inPkg.has(d.name));
+}
+
+function getSectionLabel(deliverableName) {
+  const pkgs = Object.entries(DATA.packages);
+  for (let i = pkgs.length - 1; i >= 0; i--) {
+    if (pkgs[i][1].includes(deliverableName)) return pkgs[i][0];
+  }
+  return null;
+}
+
+// Which rows to group under section labels
+function buildTableRows() {
+  const pkgNames  = Object.keys(DATA.packages);
+  const allItems  = pkgNames.flatMap(p => DATA.packages[p]).filter((v,i,a)=>a.indexOf(v)===i);
+
+  // Section labels: where does each package's unique items start?
+  const sections = [];
+  pkgNames.forEach((pkg, i) => {
+    const prev = i > 0 ? new Set(DATA.packages[pkgNames[i-1]]) : new Set();
+    const newItems = DATA.packages[pkg].filter(n => !prev.has(n));
+    if (newItems.length) {
+      sections.push({ label: pkg, startsAt: DATA.packages[pkg].indexOf(newItems[0]) < 0 ? 0 : DATA.packages[pkg].indexOf(newItems[0]) });
+    }
+  });
+
+  const rows = [];
+  let sectionIdx = 0;
+  allItems.forEach((name, idx) => {
+    // Check if we need a section divider
+    for (let si = 0; si < sections.length; si++) {
+      if (!sections[si].inserted) {
+        const pkgItems = DATA.packages[pkgNames[si]];
+        const isFirstNew = si === 0 ? idx === 0 : !DATA.packages[pkgNames[si-1]].includes(name);
+        if (isFirstNew && pkgItems.includes(name)) {
+          rows.push({ type:'section', label: SECTION_LABELS[pkgNames[si]] || pkgNames[si] });
+          sections[si].inserted = true;
+        }
+      }
+    }
+    rows.push({ type:'item', name });
+  });
+  return rows;
+}
+
+const SECTION_LABELS = {
+  'Core Brand':              'Core Brand',
+  'Core + Brand System':     'Brand System',
+  'Core + System + Digital': 'Digital Application',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER — PACKAGE TABLE
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TICK_SVG = `<svg class="tick-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <circle cx="8" cy="8" r="7.25" stroke="currentColor" stroke-width="1.5"/>
+  <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const TICK_INCLUDED = `<svg class="tick-icon included" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <circle cx="8" cy="8" r="7.25" stroke="currentColor" stroke-width="1.5"/>
+  <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const DASH = `<span style="color:var(--text-3);font-size:14px;line-height:1">—</span>`;
+
+function renderTable() {
+  const pkgNames = Object.keys(DATA.packages);
+  const grid     = document.getElementById('pkg-grid');
+
+  // Set selected-column class
+  const selIdx = state.selectedPackage ? pkgNames.indexOf(state.selectedPackage) : -1;
+  grid.className = 'pkg-grid' + (selIdx >= 0 ? ` sel-${selIdx}` : '');
+
+  let html = '';
+
+  // ── Header row ──
+  html += `<div class="pkg-header-label"></div>`;
+  pkgNames.forEach((pkg, i) => {
+    const { days, price } = calcPackage(pkg);
+    html += `
+      <div class="pkg-col-header pkg-col-${i}" data-pkg="${pkg}" onclick="selectPackage('${pkg.replace(/'/g,"\\'")}')">
+        <div class="pkg-option">Option ${i+1}</div>
+        <div class="pkg-name">${pkg}</div>
+        <div class="pkg-days">${days} days</div>
+        <div class="pkg-price">${fmt(price)}</div>
+        <button class="pkg-select-btn" onclick="event.stopPropagation();selectPackage('${pkg.replace(/'/g,"\\'")}')">
+          ${state.selectedPackage === pkg ? 'Selected' : 'Select'}
+        </button>
+      </div>`;
+  });
+
+  // ── Data rows ──
+  const rows = buildTableRows();
+  rows.forEach(row => {
+    if (row.type === 'section') {
+      html += `<div class="pkg-section-label" style="grid-column:1/-1">${row.label}</div>`;
+    } else {
+      html += `<div class="pkg-row-label">${row.name}</div>`;
+      pkgNames.forEach((pkg, i) => {
+        const included = DATA.packages[pkg].includes(row.name);
+        html += `<div class="pkg-cell pkg-col-${i}">${included ? TICK_INCLUDED : DASH}</div>`;
+      });
+    }
+  });
+
+  grid.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER — ADD-ONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderAddons() {
+  const addons  = getAddons();
+  const section = document.getElementById('addons-section');
+  const grid    = document.getElementById('addons-grid');
+  const count   = document.getElementById('addons-count');
+
+  if (!addons.length) { section.style.display = 'none'; return; }
+  section.style.display = '';
+
+  const selCount = addons.filter(d => state.addons.has(d.name)).length;
+  count.textContent = selCount > 0 ? `${selCount} selected` : '';
+
+  grid.innerHTML = addons.map(d => {
+    const sel   = state.addons.has(d.name);
+    const price = getPrice(d);
+    return `
+      <div class="addon-card${sel?' selected':''}" data-name="${d.name.replace(/"/g,'&quot;')}" onclick="toggleAddon(this.dataset.name)">
+        <div class="addon-top">
+          <div class="check">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4l3 3 5-6" stroke="#0A0A0A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="days-badge">${daysLabel(d.days)}</span>
+        </div>
+        <div class="addon-name">${d.name}</div>
+        <div class="addon-desc">${d.desc||''}</div>
+        <div class="addon-footer">
+          <span class="addon-price">${fmt(price)}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER — QUOTE
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderQuote() {
+  document.getElementById('quote-tier-label').textContent = `${state.tier} rate · ${state.currency}`;
+
+  const body   = document.getElementById('quote-body');
+  const daysEl = document.getElementById('quote-days');
+  const totEl  = document.getElementById('quote-total');
+
+  const hasPackage = !!state.selectedPackage;
+  const hasAddons  = state.addons.size > 0;
+
+  if (!hasPackage && !hasAddons) {
+    body.innerHTML = '<p class="quote-empty">Select a package to begin.</p>';
+    daysEl.textContent = '—';
+    totEl.textContent  = '—';
+    return;
+  }
+
+  let html = '', totalDays = 0, totalPrice = 0;
+
+  if (hasPackage) {
+    const { days, price } = calcPackage(state.selectedPackage);
+    totalDays  += days;
+    totalPrice += price;
+    html += `
+      <div class="quote-pkg-row">
+        <div>
+          <div class="quote-pkg-name">${state.selectedPackage}</div>
+          <div class="quote-pkg-days">${days} days included</div>
+        </div>
+        <div class="quote-pkg-price">${fmt(price)}</div>
+      </div>`;
+  }
+
+  if (hasAddons) {
+    html += `<div class="quote-addons-label">Add-ons</div>`;
+    [...state.addons].forEach(name => {
+      const d = getDeliverable(name);
+      if (!d) return;
+      const p = getPrice(d);
+      totalDays  += d.days;
+      totalPrice += p;
+      html += `<div class="quote-item">
+        <span class="quote-item-name">${d.name}</span>
+        <span class="quote-item-price">${fmt(p)}</span>
+      </div>`;
+    });
+  }
+
+  body.innerHTML = html;
+  daysEl.textContent = daysLabel(totalDays);
+  totEl.textContent  = fmt(totalPrice);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INTERACTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function selectPackage(pkg) {
+  state.selectedPackage = state.selectedPackage === pkg ? null : pkg;
+  renderAll();
+}
+
+function toggleAddon(name) {
+  state.addons.has(name) ? state.addons.delete(name) : state.addons.add(name);
+  renderAll();
+}
+
+function renderAll() {
+  renderTable();
+  renderAddons();
+  renderQuote();
+}
+
+function setupToggle(id, key) {
+  document.getElementById(id).addEventListener('click', e => {
+    const btn = e.target.closest('.toggle-btn');
+    if (!btn) return;
+    state[key] = btn.dataset.val;
+    document.querySelectorAll(`#${id} .toggle-btn`).forEach(b => b.classList.toggle('active', b===btn));
+    renderAll();
+  });
+}
+
+setupToggle('currency-toggle', 'currency');
+setupToggle('tier-toggle', 'tier');
+document.getElementById('tier-info-btn').addEventListener('click', () =>
+  document.getElementById('tier-info-panel').classList.toggle('visible'));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+
+loadData();
+</script>
+</body>
+</html>

@@ -521,7 +521,7 @@
         </div>
         <p class="vat-note">All prices ex. VAT</p>
       </div>
-      <a class="cta-btn" href="https://salo.uk/contact" target="_blank">Get in touch →</a>
+      <a class="cta-btn" id="cta-btn" href="https://cal.com/carlcahill/brand-project" target="_blank">Book a call →</a>
     </div>
   </div>
 
@@ -928,6 +928,35 @@ function renderQuote() {
   body.innerHTML = html;
   daysEl.textContent = leadTimeLabel(totalLeadTime);
   totEl.textContent  = fmt(totalPrice);
+  updateCtaUrl(totalPrice, totalLeadTime);
+}
+
+function updateCtaUrl(totalPrice, totalLeadTime) {
+  const btn = document.getElementById('cta-btn');
+  if (!btn) return;
+
+  let notes = '';
+
+  if (state.selectedPackage) {
+    notes += `Package: ${state.selectedPackage}\n`;
+  }
+
+  if (state.addons.size > 0) {
+    notes += `Add-ons: ${[...state.addons].join(', ')}\n`;
+  }
+
+  if (totalPrice > 0) {
+    notes += `Estimated investment: ${fmt(totalPrice)} (ex. VAT)\n`;
+  }
+
+  if (totalLeadTime > 0) {
+    notes += `Estimated timeline: ${leadTimeLabel(totalLeadTime)}\n`;
+  }
+
+  notes += `Rate: ${state.tier} · ${state.currency}`;
+
+  const base = 'https://cal.com/carlcahill/brand-project';
+  btn.href = notes ? `${base}?notes=${encodeURIComponent(notes)}` : base;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

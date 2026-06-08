@@ -394,6 +394,48 @@
     }
     .cta-btn:hover { opacity: 0.85; }
 
+
+    /* ── Mobile package view ─────────────────────── */
+    .mobile-pkg-view { display: none; margin-bottom: 40px; }
+
+    .mobile-tabs {
+      display: flex; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; margin-bottom: 14px;
+    }
+    .mobile-tab {
+      flex: 1; padding: 9px 6px;
+      font-family: inherit; font-size: 11px; font-weight: 500;
+      background: transparent; border: none; color: var(--text-2);
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      text-align: center; line-height: 1.3;
+    }
+    .mobile-tab.active { background: var(--surface-2); color: var(--text); }
+
+    .mobile-pkg-summary {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 16px 18px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; margin-bottom: 4px;
+    }
+    .mobile-pkg-name  { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+    .mobile-pkg-price { font-size: 22px; font-weight: 700; color: var(--green); line-height: 1; }
+
+    .mobile-section-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-3); padding: 16px 0 6px;
+      border-top: 1px solid var(--border); margin-top: 4px;
+    }
+    .mobile-section-label:first-of-type { border-top: none; padding-top: 12px; }
+    .mobile-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .mobile-row-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .mobile-tick-icon { width: 20px; flex-shrink: 0; display: flex; justify-content: center; }
+    .mobile-row-name { font-size: 13px; color: var(--text-2); }
+    .mobile-row-name.muted { color: var(--text-3); }
+
     /* ── Responsive ───────────────────────────────── */
     @media (max-width: 960px) {
       .page { grid-template-columns: 1fr; gap: 32px; padding: 0 20px 80px; }
@@ -402,6 +444,10 @@
       .addons-grid { grid-template-columns: 1fr; }
       .quote-sidebar { position: static; order: -1; }
       .tier-info-panel.visible { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .pkg-table-wrap  { display: none; }
+      .mobile-pkg-view { display: block; }
     }
 
     @keyframes fadeIn {
@@ -483,6 +529,8 @@
   <div class="main-col">
 
     <!-- Package comparison table -->
+    <div class="mobile-pkg-view" id="mobile-pkg-view"></div>
+
     <div class="pkg-table-wrap" id="pkg-table-wrap">
       <div class="pkg-grid" id="pkg-grid"><!-- rendered by JS --></div>
     </div>
@@ -584,6 +632,7 @@ const state = {
   currency:        'GBP',
   tier:            'Partner',
   selectedPackage: null,
+  mobilePkg:       null,
   addons:          new Set(),
 };
 
@@ -666,10 +715,9 @@ async function loadData() {
     setStatus('', 'Using built-in pricing. Set the sheet to "Anyone with link can view" for live rates.');
   }
   // Pre-select Option 2 (Core + Brand System) by default
-  if (!state.selectedPackage) {
-    const pkgNames = Object.keys(DATA.packages);
-    if (pkgNames.length >= 2) state.selectedPackage = pkgNames[1];
-  }
+  const pkgNames = Object.keys(DATA.packages);
+  if (!state.selectedPackage && pkgNames.length >= 2) state.selectedPackage = pkgNames[1];
+  if (!state.mobilePkg && pkgNames.length >= 2) state.mobilePkg = pkgNames[1];
   renderAll();
 }
 
@@ -841,6 +889,83 @@ function renderTable() {
   grid.innerHTML = html;
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER — MOBILE PACKAGE VIEW
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderMobileTable() {
+  const el = document.getElementById('mobile-pkg-view');
+  if (!el) return;
+
+  const pkgNames = Object.keys(DATA.packages);
+  if (!state.mobilePkg) state.mobilePkg = pkgNames[1] || pkgNames[0];
+  const activePkg = state.mobilePkg;
+  const { price } = calcPackage(activePkg);
+
+  // Short tab labels
+  const shortLabels = ['Option 1', 'Option 2', 'Option 3'];
+  let html = '';
+
+  // Tab strip
+  html += '<div class="mobile-tabs">';
+  pkgNames.forEach((pkg, i) => {
+    html += `<button class="mobile-tab${pkg === activePkg ? ' active' : ''}"
+      onclick="setMobilePkg('${pkg.replace(/'/g, "\'")}')">
+      ${shortLabels[i] || pkg}
+    </button>`;
+  });
+  html += '</div>';
+
+  // Package summary card
+  const isSelected = state.selectedPackage === activePkg;
+  html += `<div class="mobile-pkg-summary">
+    <div>
+      <div class="mobile-pkg-name">${activePkg}</div>
+      <div class="mobile-pkg-price">${fmt(price)}</div>
+    </div>
+    <button class="pkg-select-btn" style="width:auto;padding:9px 20px;border-radius:6px;margin-bottom:0"
+      onclick="selectPackage('${activePkg.replace(/'/g, "\'")}')">
+      ${isSelected ? 'Selected' : 'Select'}
+    </button>
+  </div>`;
+
+  // Deliverable rows
+  const rows = buildTableRows();
+  let firstSection = true;
+  rows.forEach(row => {
+    if (row.type === 'section') {
+      html += `<div class="mobile-section-label${firstSection ? ' first' : ''}">${row.label}</div>`;
+      firstSection = false;
+    } else {
+      const included = DATA.packages[activePkg].includes(row.name);
+      const d = getDeliverable(row.name);
+      const rowId = 'mpinfo-' + row.name.replace(/[^a-zA-Z0-9]/g, '-');
+      const tickSvg = included
+        ? `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7.25" stroke="var(--green)" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+        : `<span style="color:var(--text-3);font-size:14px">—</span>`;
+      html += `<div class="mobile-row">
+        <div class="mobile-row-left">
+          <span class="mobile-tick-icon">${tickSvg}</span>
+          <span class="mobile-row-name${!included ? ' muted' : ''}">${row.name}</span>
+        </div>
+        <button class="row-info-btn" onclick="togglePkgInfo('${rowId}')">i</button>
+      </div>
+      <div class="pkg-info-row" id="${rowId}">
+        ${d && d.desc ? `<div class="pkg-info-desc">${d.desc}</div>` : ''}
+        ${d && d.leadTime ? `<div class="pkg-info-lead">⏱ Timeline: <strong>${leadTimeLabel(parseFloat(d.leadTime) || 0)}</strong></div>` : ''}
+      </div>`;
+    }
+  });
+
+  el.innerHTML = html;
+}
+
+function setMobilePkg(pkg) {
+  state.mobilePkg = pkg;
+  renderAll();
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // RENDER — ADD-ONS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1002,6 +1127,7 @@ function toggleAddon(name) {
 
 function renderAll() {
   renderTable();
+  renderMobileTable();
   renderAddons();
   renderQuote();
 }

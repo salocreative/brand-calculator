@@ -128,17 +128,20 @@
     .tier-block li { font-size: 11px; color: var(--text-2); display: flex; gap: 6px; }
     .tier-block li::before { content: '—'; color: var(--text-3); flex-shrink: 0; }
 
-    /* ── Sheet status ────────────────────────────── */
+    /* ── Sheet status (fixed bottom bar) ─────────── */
     .sheet-status {
-      grid-column: 1 / -1;
-      display: flex; align-items: center; gap: 8px;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
       font-size: 11px; color: var(--text-3);
-      padding: 7px 12px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px;
+      padding: 8px 20px;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border);
+      z-index: 100;
     }
-    .sheet-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
+    .sheet-status .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
     .sheet-status.connected .dot { background: var(--green); }
-    .sheet-status.connected { color: var(--text-2); }
+    .sheet-status.connected { color: var(--text-3); }
 
     /* ── Package comparison table ────────────────── */
     .pkg-table-wrap {
@@ -177,7 +180,13 @@
     .pkg-col-header:hover { background: var(--surface-2); }
 
 
-    .pkg-option { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); margin-bottom: 4px; }
+    .pkg-option { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .popular-badge {
+      font-size: 9px; font-weight: 600; padding: 2px 6px;
+      border-radius: 3px; letter-spacing: 0.06em;
+      background: rgba(74,222,128,0.12); color: var(--green);
+      text-transform: uppercase; border: 1px solid rgba(74,222,128,0.25);
+    }
     .pkg-name   { font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
     .pkg-days   { font-size: 12px; color: var(--text-2); margin-bottom: 10px; }
     .pkg-price  { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--text-2); }
@@ -440,12 +449,6 @@
     </div>
   </div>
 
-  <!-- Sheet status -->
-  <div class="sheet-status" id="sheet-status">
-    <span class="dot"></span>
-    <span id="sheet-status-text">Loading pricing…</span>
-  </div>
-
   <!-- Main column -->
   <div class="main-col">
 
@@ -631,6 +634,11 @@ async function loadData() {
     DATA = FALLBACK;
     setStatus('', 'Using built-in pricing. Set the sheet to "Anyone with link can view" for live rates.');
   }
+  // Pre-select Option 2 (Core + Brand System) by default
+  if (!state.selectedPackage) {
+    const pkgNames = Object.keys(DATA.packages);
+    if (pkgNames.length >= 2) state.selectedPackage = pkgNames[1];
+  }
   renderAll();
 }
 
@@ -750,7 +758,7 @@ function renderTable() {
     const { days, price } = calcPackage(pkg);
     html += `
       <div class="pkg-col-header pkg-col-${i}" data-pkg="${pkg}" onclick="selectPackage('${pkg.replace(/'/g,"\\'")}')">
-        <div class="pkg-option">Option ${i+1}</div>
+        <div class="pkg-option">Option ${i+1}${i===1?' <span class="popular-badge">Most popular</span>':''}</div>
         <div class="pkg-name">${pkg}</div>
         <div class="pkg-price">${fmt(price)}</div>
         <button class="pkg-select-btn" onclick="event.stopPropagation();selectPackage('${pkg.replace(/'/g,"\\'")}')">
@@ -911,5 +919,11 @@ document.getElementById('tier-info-btn').addEventListener('click', () =>
 
 loadData();
 </script>
+  <!-- Sheet status (bottom bar) -->
+  <div class="sheet-status" id="sheet-status">
+    <span class="dot"></span>
+    <span id="sheet-status-text">Loading pricing…</span>
+  </div>
+
 </body>
 </html>

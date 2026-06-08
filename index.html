@@ -143,6 +143,35 @@
     .sheet-status.connected .dot { background: var(--green); }
     .sheet-status.connected { color: var(--text-3); }
 
+    /* ── Row info icon & expandable panel ────────── */
+    .pkg-row-label {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .row-info-btn {
+      width: 16px; height: 16px; min-width: 16px; border-radius: 50%;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-3); font-size: 9px; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s, color 0.15s; flex-shrink: 0;
+    }
+    .row-info-btn:hover,
+    .row-info-btn.active { border-color: var(--text-2); color: var(--text-2); }
+    .pkg-info-row {
+      display: none; grid-column: 1 / -1;
+      padding: 12px 18px 14px;
+      background: var(--surface-2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .pkg-info-row.visible { display: block; }
+    .pkg-info-desc { font-size: 12px; color: var(--text-2); line-height: 1.6; margin-bottom: 6px; }
+    .pkg-info-lead {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text-3);
+    }
+    .pkg-info-lead strong { color: var(--text-2); font-weight: 500; }
+
     /* ── Package comparison table ────────────────── */
     .pkg-table-wrap {
       overflow-x: auto;
@@ -621,6 +650,7 @@ function parseDeliverables(rows) {
       },
       optional: parseBool(r[6]),
       desc,
+      leadTime: r[8] ? r[8].trim() : '',
     };
   });
 }
@@ -773,11 +803,23 @@ function renderTable() {
     if (row.type === 'section') {
       html += `<div class="pkg-section-label" style="grid-column:1/-1">${row.label}</div>`;
     } else {
-      html += `<div class="pkg-row-label">${row.name}</div>`;
+      const d = getDeliverable(row.name);
+      const rowId = 'pinfo-' + row.name.replace(/[^a-zA-Z0-9]/g, '-');
+      html += `<div class="pkg-row-label">
+        <span>${row.name}</span>
+        <button class="row-info-btn" onclick="togglePkgInfo('${rowId}')" title="About this deliverable">i</button>
+      </div>`;
       pkgNames.forEach((pkg, i) => {
         const included = DATA.packages[pkg].includes(row.name);
         html += `<div class="pkg-cell pkg-col-${i}">${included ? TICK_INCLUDED : DASH}</div>`;
       });
+      // Expandable info row spanning all columns
+      const desc = d ? (d.desc || '') : '';
+      const lt   = d ? (d.leadTime || '') : '';
+      html += `<div class="pkg-info-row" id="${rowId}">
+        ${desc ? `<div class="pkg-info-desc">${desc}</div>` : ''}
+        ${lt   ? `<div class="pkg-info-lead">⏱ Lead time: <strong>${lt}</strong></div>` : ''}
+      </div>`;
     }
   });
 
@@ -881,6 +923,29 @@ function renderQuote() {
 // ─────────────────────────────────────────────────────────────────────────────
 // INTERACTIONS
 // ─────────────────────────────────────────────────────────────────────────────
+
+function togglePkgInfo(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('visible');
+  // Toggle active state on the button
+  const btn = el.previousElementSibling
+    ? el.previousElementSibling.querySelector ? null : null
+    : null;
+  // Find the button via the row label before this info row
+  const allInfoRows = document.querySelectorAll('.pkg-info-row');
+  allInfoRows.forEach(r => {
+    if (r.id === id) {
+      // Walk back through siblings to find the label
+      let prev = r.previousElementSibling;
+      while (prev && !prev.classList.contains('pkg-row-label')) prev = prev.previousElementSibling;
+      if (prev) {
+        const b = prev.querySelector('.row-info-btn');
+        if (b) b.classList.toggle('active', r.classList.contains('visible'));
+      }
+    }
+  });
+}
 
 function selectPackage(pkg) {
   state.selectedPackage = state.selectedPackage === pkg ? null : pkg;

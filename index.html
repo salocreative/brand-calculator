@@ -638,7 +638,7 @@ function parsePackages(rows) {
 
 function parseDeliverables(rows) {
   return rows.slice(1).filter(r => r[0]).map(r => {
-    const raw  = r[7] || '';
+    const raw  = r[8] || '';
     const idx  = raw.indexOf(',');
     const desc = idx > -1 ? raw.slice(idx+1).trim() : raw;
     return {
@@ -650,7 +650,7 @@ function parseDeliverables(rows) {
       },
       optional: parseBool(r[6]),
       desc,
-      leadTime: r[8] ? r[8].trim() : '',
+      leadTime: r[7] ? r[7].trim() : '',
     };
   });
 }
